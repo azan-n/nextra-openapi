@@ -14,7 +14,13 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@azan-n/nextra-openapi-cli": ["packages/cli/src/index.ts"],
+      "@azan-n/nextra-openapi-components": ["packages/components/src/index.ts"],
+      "@azan-n/nextra-openapi-components/server": [
+        "packages/components/src/server.ts"
+      ]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
