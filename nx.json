@@ -50,6 +50,12 @@
         "babel": true
       },
       "library": {}
+    },
+    "@nx/next": {
+      "application": {
+        "style": "scss",
+        "linter": "eslint"
+      }
     }
   }
 }

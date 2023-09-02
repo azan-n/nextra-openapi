@@ -42,4 +42,4 @@ Thumbs.db
 .next
 
 # CLI Test
-generated-docs
+/generated-docs

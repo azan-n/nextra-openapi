@@ -1,12 +1,20 @@
-import { mkdirSync } from 'fs'
+import { mkdirSync, rmSync } from 'fs'
 import { join } from 'node:path';
 import * as slug from 'slug'
 import { outputFile } from 'fs-extra'
 import { AppStore, GroupModel, IMenuItem, OperationModel, isAbsoluteUrl, loadAndBundleSpec } from 'redoc';
 import { resolve } from 'path';
-import { getIntroductionMdx, getSectionMdx } from './mdx-generators';
+import { Introduction } from './components/Introduction';
+import { Operation } from './components/Operation';
+import { Section } from './components/Section';
 
-export async function generateRedoc(path: string, outputDir: string) {
+export async function generateRedoc(path: string, outputDir: string, deleteExisting: boolean) {
+  
+  // Delete existing directory if it exists and if the flag has been set
+  if (deleteExisting) {
+    rmSync(outputDir, { recursive: true, force: true });
+  }
+
   const api = await loadAndBundleSpec(isAbsoluteUrl(path) ? path : resolve(path));
 
   // Create Redoc store. This contains info about the spec and the menu items.
@@ -16,7 +24,7 @@ export async function generateRedoc(path: string, outputDir: string) {
 
   if (appStore.spec.info) {
     // Write the index.mdx file
-    writeFileGuarded(join(outputDir, 'index.mdx'), getIntroductionMdx(appStore.spec.info));
+    writeFileGuarded(join(outputDir, 'index.mdx'), Introduction(appStore.spec.info));
     // Add entry to top level _meta.json
     _meta['index'] = 'Introduction';
   } else {
@@ -36,18 +44,18 @@ function createFilesForItems(menuItems: IMenuItem[], outputDir: string, parentMe
       // Coerce type as per Redoc internals
       const operation = item as OperationModel;
       // Safe file name
-      const fileName = slug(operation.name.concat('.operation'));
+      const fileName = slug(operation.name.concat('-operation'));
       // Create file for the operation
-      writeFileGuarded(join(outputDir, fileName.concat('.mdx')), operation.httpVerb);
+      writeFileGuarded(join(outputDir, fileName.concat('.mdx')), Operation(operation));
       // Create an entry in the meta.json for the operation
       parentMetaJson[fileName] = (item.sidebarLabel);
     } else if (item.type === 'section') {
       // Coerce type as per Redoc internals
       const section = item as GroupModel;
       // Safe file name to prevent tag and section name collisions
-      const sectionFileName = slug(section.name.concat('.section'));
+      const sectionFileName = slug(section.name.concat('-section'));
       // Create a page for the section
-      writeFileGuarded(join(outputDir, sectionFileName.concat('.mdx')), getSectionMdx(section));
+      writeFileGuarded(join(outputDir, sectionFileName.concat('.mdx')), Section(section));
       // Create an entry in the meta.json for the section
       parentMetaJson[sectionFileName] = (item.name);
     } else if (item.type === 'tag') {
@@ -63,7 +71,7 @@ function createFilesForItems(menuItems: IMenuItem[], outputDir: string, parentMe
 
       // Create tag page within tag folder
       // TODO flag for not creating tag page
-      writeFileGuarded(join(outputDir, tagDirName.concat('.mdx')), getSectionMdx(tag));
+      writeFileGuarded(join(outputDir, tagDirName.concat('.mdx')), Section(tag));
       // Create an entry in the meta.json for the tag
       parentMetaJson[tagDirName] = "";
 

@@ -20,8 +20,8 @@
       "command": "node tools/scripts/publish.mjs cli {args.ver} {args.tag}",
       "dependsOn": ["build"]
     },
-    "run": {
-      "command": "node dist/packages/cli/src/index.js -s https://api.cryptlex.com/api-docs/v3/swagger.json",
+    "generate": {
+      "command": "node dist/packages/cli/src/index.js -s https://api.cryptlex.com/api-docs/v3/swagger.json -o packages/demo/pages/generated-docs --deleteExisting true",
       "dependsOn": ["build"]
     },
     "lint": {
